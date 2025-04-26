@@ -14,6 +14,7 @@ import {
   Database,
   MessageSquare,
   Shield,
+  Brain
 } from "lucide-react"
 
 export function DashboardSidebar() {
@@ -94,6 +95,14 @@ export function DashboardSidebar() {
           <span>Database</span>
         </Link>
 
+        <Link
+          href="/dashboard/gemini"
+          className={`flex items-center gap-3 px-3 py-2 rounded-md ${isActive("/dashboard/gemini") ? "bg-primary text-primary-foreground" : "text-slate-300 hover:bg-slate-800"}`}
+        >
+          <Brain className="h-5 w-5" />
+          <span>AI Analysis</span>
+        </Link>
+
         <p className="text-xs text-slate-400 mt-6 mb-2">SYSTEM</p>
 
         <Link
@@ -122,4 +131,3 @@ export function DashboardSidebar() {
     </div>
   )
 }
-
