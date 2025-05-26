@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Filter, Download, Plus, MoreHorizontal, MapPin, AlertTriangle, Shield, Eye } from "lucide-react"
+import { Search, Plus, MoreHorizontal, MapPin, AlertTriangle, Shield, Eye } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,9 +19,52 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import GoogleMapsComponent from "@/components/google-maps"
 
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter,
+  DialogDescription
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+
 export default function SuspectsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedRisk, setSelectedRisk] = useState("all")
+  const [isAddSuspectOpen, setIsAddSuspectOpen] = useState(false)
+  const [newSuspect, setNewSuspect] = useState({
+    id: `S-${Math.floor(1000 + Math.random() * 9000)}`,
+    name: "",
+    alias: "",
+    risk: "medium",
+    status: "monitoring",
+    lastSeen: "Just added",
+    location: "",
+    platforms: [],
+    cases: 0
+  })
+
+  // Function to handle adding a new suspect
+  const handleAddSuspect = () => {
+    // In a real app, you would add API call here
+    console.log("New suspect data:", newSuspect)
+    // Close the dialog
+    setIsAddSuspectOpen(false)
+    // Reset form (in real app, you would add the new suspect to the list)
+    setNewSuspect({
+      id: `S-${Math.floor(1000 + Math.random() * 9000)}`,
+      name: "",
+      alias: "",
+      risk: "medium",
+      status: "monitoring",
+      lastSeen: "Just added",
+      location: "",
+      platforms: [],
+      cases: 0
+    })
+  }
 
   const suspects = [
     {
@@ -124,15 +167,7 @@ export default function SuspectsPage() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline">
-              <Filter className="mr-2 h-4 w-4" />
-              Filters
-            </Button>
-            <Button variant="outline">
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
-            <Button>
+            <Button onClick={() => setIsAddSuspectOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Add Suspect
             </Button>
@@ -420,6 +455,121 @@ export default function SuspectsPage() {
             </Card>
           </TabsContent>
         </Tabs>
+      
+        {/* Add Suspect Dialog */}
+        <Dialog open={isAddSuspectOpen} onOpenChange={setIsAddSuspectOpen}>
+          <DialogContent className="sm:max-w-[525px]">
+            <DialogHeader>
+              <DialogTitle>Add New Suspect</DialogTitle>
+              <DialogDescription>
+                Enter details about the new suspect to add them to the system.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="suspectId" className="text-right">
+                  ID
+                </Label>
+                <Input
+                  id="suspectId"
+                  value={newSuspect.id}
+                  className="col-span-3"
+                  disabled
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Name
+                </Label>
+                <Input
+                  id="name"
+                  value={newSuspect.name}
+                  onChange={(e) => setNewSuspect({...newSuspect, name: e.target.value})}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="alias" className="text-right">
+                  Alias
+                </Label>
+                <Input
+                  id="alias"
+                  placeholder="@username"
+                  value={newSuspect.alias}
+                  onChange={(e) => setNewSuspect({...newSuspect, alias: e.target.value})}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="risk" className="text-right">
+                  Risk Level
+                </Label>
+                <Select 
+                  value={newSuspect.risk} 
+                  onValueChange={(value) => setNewSuspect({...newSuspect, risk: value})}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select risk level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="status" className="text-right">
+                  Status
+                </Label>
+                <Select 
+                  value={newSuspect.status} 
+                  onValueChange={(value) => setNewSuspect({...newSuspect, status: value})}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="monitoring">Monitoring</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="location" className="text-right">
+                  Location
+                </Label>
+                <Input
+                  id="location"
+                  value={newSuspect.location}
+                  onChange={(e) => setNewSuspect({...newSuspect, location: e.target.value})}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="cases" className="text-right">
+                  Cases
+                </Label>
+                <Input
+                  id="cases"
+                  type="number"
+                  min="0"
+                  value={newSuspect.cases}
+                  onChange={(e) => setNewSuspect({...newSuspect, cases: parseInt(e.target.value) || 0})}
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAddSuspectOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" onClick={handleAddSuspect}>
+                Add Suspect
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
@@ -474,4 +624,3 @@ function SuspectMapView({ suspects }: { suspects: any[] }) {
     </div>
   )
 }
-

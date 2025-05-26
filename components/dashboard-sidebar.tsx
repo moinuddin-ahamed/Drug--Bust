@@ -78,15 +78,6 @@ export function DashboardSidebar() {
           <FileText className="h-5 w-5" />
           <span>Reports</span>
         </Link>
-
-        <Link
-          href="/dashboard/chat-analysis"
-          className={`flex items-center gap-3 px-3 py-2 rounded-md ${isActive("/dashboard/chat-analysis") ? "bg-primary text-primary-foreground" : "text-slate-300 hover:bg-slate-800"}`}
-        >
-          <MessageSquare className="h-5 w-5" />
-          <span>Chat Analysis</span>
-        </Link>
-
         <Link
           href="/dashboard/database"
           className={`flex items-center gap-3 px-3 py-2 rounded-md ${isActive("/dashboard/database") ? "bg-primary text-primary-foreground" : "text-slate-300 hover:bg-slate-800"}`}
