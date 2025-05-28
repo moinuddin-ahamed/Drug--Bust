@@ -17,11 +17,13 @@ interface Location {
   suspectCount?: number
 }
 
+interface SurveillanceLocation extends Location {}
+
 interface GoogleMapsComponentProps {
-  locations: Location[]
-  mapType?: "surveillance" | "suspects" | "hotspots"
-  height?: string
-  onMarkerClick?: (location: Location) => void
+  locations: SurveillanceLocation[];
+  mapType?: string;
+  height?: string;
+  onMarkerClick?: (location: SurveillanceLocation) => void;
 }
 
 // Declare google variable

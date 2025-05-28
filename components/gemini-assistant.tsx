@@ -139,7 +139,7 @@ export function GeminiAssistant() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Brain className="h-5 w-5 text-primary" />
-          Gemini Investigation Assistant
+          Drug Investigation Assistant
         </CardTitle>
         <CardDescription>
           Ask questions about drug investigations, trafficking patterns, substance identification, and enforcement strategies

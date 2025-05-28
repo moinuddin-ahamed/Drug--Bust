@@ -103,14 +103,6 @@ export function DashboardSidebar() {
           <Settings className="h-5 w-5" />
           <span>Settings</span>
         </Link>
-
-        <Link
-          href="/dashboard/support"
-          className={`flex items-center gap-3 px-3 py-2 rounded-md ${isActive("/dashboard/support") ? "bg-primary text-primary-foreground" : "text-slate-300 hover:bg-slate-800"}`}
-        >
-          <HelpCircle className="h-5 w-5" />
-          <span>Support</span>
-        </Link>
       </nav>
 
       <div className="p-4 border-t border-slate-800">

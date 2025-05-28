@@ -1,42 +1,55 @@
-import type React from "react"
+import React from "react"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowDown, ArrowUp } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { ArrowDownIcon, ArrowUpIcon } from "lucide-react"
 
-interface StatCardProps {
+export interface StatCardProps {
   title: string
   value: string
   change: string
-  trend: "up" | "down" | "neutral"
+  trend: "up" | "down"
   description: string
   icon: React.ReactNode
+  onClick?: () => void  // Add the onClick prop as optional
 }
 
-export function StatCard({ title, value, change, trend, description, icon }: StatCardProps) {
+export function StatCard({
+  title,
+  value,
+  change,
+  trend,
+  description,
+  icon,
+  onClick
+}: StatCardProps) {
   return (
-    <Card>
+    <Card 
+      className={cn(
+        "overflow-hidden transition-all",
+        onClick && "cursor-pointer hover:shadow-md"
+      )}
+      onClick={onClick}
+    >
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
-          <span className="text-muted-foreground">{title}</span>
-          <div className="p-2 bg-primary/10 rounded-full text-primary">{icon}</div>
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+            {icon}
+          </div>
+          <span
+            className={cn(
+              "flex items-center text-sm font-medium",
+              trend === "up" ? "text-green-600" : "text-red-600"
+            )}
+          >
+            {trend === "up" ? <ArrowUpIcon className="mr-1 h-4 w-4" /> : <ArrowDownIcon className="mr-1 h-4 w-4" />}
+            {change}
+          </span>
         </div>
         <div className="mt-4">
-          <div className="text-3xl font-bold">{value}</div>
-          <div className="flex items-center mt-1 text-sm">
-            <div
-              className={`flex items-center ${
-                trend === "up" ? "text-green-500" : trend === "down" ? "text-red-500" : "text-muted-foreground"
-              }`}
-            >
-              {trend === "up" ? (
-                <ArrowUp className="h-4 w-4 mr-1" />
-              ) : trend === "down" ? (
-                <ArrowDown className="h-4 w-4 mr-1" />
-              ) : null}
-              {change}
-            </div>
-            <div className="text-muted-foreground ml-2">{description}</div>
-          </div>
+          <h3 className="text-3xl font-bold">{value}</h3>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
         </div>
+        <p className="mt-2 text-xs text-muted-foreground">{description}</p>
       </CardContent>
     </Card>
   )
