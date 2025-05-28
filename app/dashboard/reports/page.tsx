@@ -9,6 +9,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -18,11 +29,26 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+// Define a type for the report object
+type Report = {
+  id: string;
+  title: string;
+  type: string;
+  status: string;
+  date: string;
+  author: string;
+  authorAvatar: string;
+  summary: string;
+}
+
+// Define a type for the new report (without id and date)
+type NewReport = Omit<Report, 'id' | 'date'>;
+
 export default function ReportsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("all")
-
-  const reports = [
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [reports, setReports] = useState<Report[]>([
     {
       id: "RPT-1001",
       title: "Mumbai Drug Trafficking Network Analysis",
@@ -93,7 +119,50 @@ export default function ReportsPage() {
       authorAvatar: "AR",
       summary: "Analysis of drug trafficking activities conducted through social media in Pune.",
     },
-  ]
+  ])
+
+  const [newReport, setNewReport] = useState<NewReport>({
+    title: "",
+    type: "Intelligence",
+    status: "draft",
+    summary: "",
+    author: "Current User",
+    authorAvatar: "CU",
+  })
+
+  const generateReportId = () => {
+    const lastId = reports.length > 0 ? parseInt(reports[0].id.split("-")[1]) : 1000
+    return `RPT-${lastId + 1}`
+  }
+
+  const handleInputChange = (field: keyof NewReport, value: string) => {
+    setNewReport({
+      ...newReport,
+      [field]: value,
+    })
+  }
+
+  const handleSubmit = () => {
+    const today = new Date().toISOString().split("T")[0]
+
+    const reportToAdd: Report = {
+      ...newReport,
+      id: generateReportId(),
+      date: today,
+    }
+
+    setReports([reportToAdd, ...reports])
+    setDialogOpen(false)
+
+    setNewReport({
+      title: "",
+      type: "Intelligence",
+      status: "draft",
+      summary: "",
+      author: "Current User",
+      authorAvatar: "CU",
+    })
+  }
 
   const filteredReports =
     selectedStatus === "all" ? reports : reports.filter((report) => report.status === selectedStatus)
@@ -124,10 +193,98 @@ export default function ReportsPage() {
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              New Report
-            </Button>
+
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Report
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[525px]">
+                <DialogHeader>
+                  <DialogTitle>Create New Report</DialogTitle>
+                  <DialogDescription>
+                    Fill out the details below to create a new intelligence report.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="title" className="text-right">
+                      Title
+                    </Label>
+                    <Input
+                      id="title"
+                      placeholder="Report title"
+                      className="col-span-3"
+                      value={newReport.title}
+                      onChange={(e) => handleInputChange("title", e.target.value)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="type" className="text-right">
+                      Type
+                    </Label>
+                    <Select value={newReport.type} onValueChange={(value) => handleInputChange("type", value)}>
+                      <SelectTrigger className="col-span-3">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Intelligence">Intelligence</SelectItem>
+                        <SelectItem value="Surveillance">Surveillance</SelectItem>
+                        <SelectItem value="Suspect">Suspect</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="status" className="text-right">
+                      Status
+                    </Label>
+                    <Select value={newReport.status} onValueChange={(value) => handleInputChange("status", value)}>
+                      <SelectTrigger className="col-span-3">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draft">Draft</SelectItem>
+                        <SelectItem value="in-progress">In Progress</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="author" className="text-right">
+                      Author
+                    </Label>
+                    <Input
+                      id="author"
+                      value={newReport.author}
+                      className="col-span-3"
+                      onChange={(e) => handleInputChange("author", e.target.value)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-start gap-4">
+                    <Label htmlFor="summary" className="text-right">
+                      Summary
+                    </Label>
+                    <Textarea
+                      id="summary"
+                      placeholder="Brief summary of the report"
+                      className="col-span-3"
+                      value={newReport.summary}
+                      onChange={(e) => handleInputChange("summary", e.target.value)}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" onClick={handleSubmit} disabled={!newReport.title}>
+                    Create Report
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
@@ -233,21 +390,19 @@ export default function ReportsPage() {
                         <TableCell>
                           <Badge
                             variant="outline"
-                            className={`
-                            ${
+                            className={`${
                               report.status === "completed"
                                 ? "bg-green-100 text-green-800 hover:bg-green-100"
                                 : report.status === "in-progress"
-                                  ? "bg-amber-100 text-amber-800 hover:bg-amber-100"
-                                  : "bg-blue-100 text-blue-800 hover:bg-blue-100"
-                            }
-                          `}
+                                ? "bg-amber-100 text-amber-800 hover:bg-amber-100"
+                                : "bg-blue-100 text-blue-800 hover:bg-blue-100"
+                            }`}
                           >
                             {report.status === "completed"
                               ? "Completed"
                               : report.status === "in-progress"
-                                ? "In Progress"
-                                : "Draft"}
+                              ? "In Progress"
+                              : "Draft"}
                           </Badge>
                         </TableCell>
                         <TableCell>{new Date(report.date).toLocaleDateString()}</TableCell>
@@ -300,21 +455,19 @@ export default function ReportsPage() {
                     <div className="flex justify-between items-start">
                       <Badge
                         variant="outline"
-                        className={`
-                        ${
+                        className={`${
                           report.status === "completed"
                             ? "bg-green-100 text-green-800 hover:bg-green-100"
                             : report.status === "in-progress"
-                              ? "bg-amber-100 text-amber-800 hover:bg-amber-100"
-                              : "bg-blue-100 text-blue-800 hover:bg-blue-100"
-                        }
-                      `}
+                            ? "bg-amber-100 text-amber-800 hover:bg-amber-100"
+                            : "bg-blue-100 text-blue-800 hover:bg-blue-100"
+                        }`}
                       >
                         {report.status === "completed"
                           ? "Completed"
                           : report.status === "in-progress"
-                            ? "In Progress"
-                            : "Draft"}
+                          ? "In Progress"
+                          : "Draft"}
                       </Badge>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -372,4 +525,3 @@ export default function ReportsPage() {
     </div>
   )
 }
-

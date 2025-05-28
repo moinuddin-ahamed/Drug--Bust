@@ -2,17 +2,16 @@
 
 import { useState } from "react"
 import {
-  Download,
   BarChart2,
   PieChart,
   TrendingUp,
   Clock,
   AlertTriangle,
-  FileText,
   MessageSquare,
   ChevronRight,
   ArrowUpRight,
   ArrowDownRight,
+  MapPin,
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -21,8 +20,10 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+// Update the import to use the working component
+import GoogleMapsComponent from "@/components/google-maps"
+
 export default function IntelligencePage() {
-  const [searchQuery, setSearchQuery] = useState("")
   const [timeRange, setTimeRange] = useState("7d")
 
   return (
@@ -54,15 +55,6 @@ export default function IntelligencePage() {
                 <SelectItem value="1y">Last Year</SelectItem>
               </SelectContent>
             </Select>
-
-            <Button variant="outline">
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
-            <Button>
-              <FileText className="mr-2 h-4 w-4" />
-              Generate Report
-            </Button>
           </div>
         </div>
 
@@ -134,7 +126,6 @@ export default function IntelligencePage() {
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="trends">Trends</TabsTrigger>
-            <TabsTrigger value="networks">Networks</TabsTrigger>
             <TabsTrigger value="hotspots">Hotspots</TabsTrigger>
           </TabsList>
 
@@ -331,31 +322,64 @@ export default function IntelligencePage() {
                 <CardTitle>Trend Analysis</CardTitle>
                 <CardDescription>Long-term patterns in trafficking activities</CardDescription>
               </CardHeader>
-              <CardContent className="h-[400px] flex items-center justify-center">
-                <div className="text-center">
-                  <TrendingUp className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium">Trend visualization</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Detailed trend analysis charts will be displayed here
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="networks" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Network Analysis</CardTitle>
-                <CardDescription>Connections between suspects and organizations</CardDescription>
-              </CardHeader>
-              <CardContent className="h-[400px] flex items-center justify-center">
-                <div className="text-center">
-                  <MessageSquare className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium">Network visualization</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Network graph visualization will be displayed here
-                  </p>
+              <CardContent className="h-[400px]">
+                <div className="w-full h-full">
+                  <div className="flex justify-between items-center mb-4">
+                    <div>
+                      <h3 className="text-sm font-medium">Monthly Drug Seizures</h3>
+                      <p className="text-xs text-muted-foreground">Measured in kilograms</p>
+                    </div>
+                    <Select defaultValue="6m">
+                      <SelectTrigger className="w-[120px]">
+                        <SelectValue placeholder="Period" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="3m">3 Months</SelectItem>
+                        <SelectItem value="6m">6 Months</SelectItem>
+                        <SelectItem value="1y">1 Year</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="h-[300px] w-full relative">
+                    {/* Visual chart representation */}
+                    <div className="absolute bottom-0 left-0 right-0 h-[240px] flex items-end">
+                      {[65, 42, 85, 72, 56, 92, 39, 68, 51, 75, 49, 80].map((value, i) => (
+                        <div key={i} className="flex-1 mx-1 flex flex-col items-center">
+                          <div 
+                            className="w-full bg-primary/80 rounded-t"
+                            style={{ height: `${value * 2}px` }}
+                          ></div>
+                          <span className="text-xs mt-1">{`M${i+1}`}</span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Horizontal grid lines */}
+                    <div className="absolute left-0 right-0 top-0 bottom-[20px] flex flex-col justify-between pointer-events-none">
+                      {[0, 1, 2, 3, 4].map((_, i) => (
+                        <div key={i} className="border-t border-border w-full h-0"></div>
+                      ))}
+                    </div>
+                    
+                    {/* Y-axis labels */}
+                    <div className="absolute left-0 top-0 bottom-[20px] w-[30px] flex flex-col justify-between items-end pr-2 text-xs text-muted-foreground">
+                      {[100, 75, 50, 25, 0].map((value) => (
+                        <div key={value}>{value}</div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 grid grid-cols-2 gap-4">
+                    <div className="p-3 border rounded-lg">
+                      <div className="text-sm text-muted-foreground">Peak Period</div>
+                      <div className="text-lg font-semibold mt-1">July 2024</div>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="text-sm text-muted-foreground">Growth Rate</div>
+                      <div className="text-lg font-semibold mt-1 text-green-600">+12.4%</div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -367,10 +391,8 @@ export default function IntelligencePage() {
                 <CardTitle>Geographic Hotspots</CardTitle>
                 <CardDescription>Areas with high trafficking activity</CardDescription>
               </CardHeader>
-              <CardContent className="h-[400px] flex items-center justify-center">
-                <div className="text-center">
-                  <MapHotspots />
-                </div>
+              <CardContent className="h-[400px]">
+                <MapHotspots />
               </CardContent>
             </Card>
           </TabsContent>
@@ -386,42 +408,41 @@ function MapHotspots() {
       id: "HS-1001",
       name: "Mumbai Central",
       coordinates: { lat: 19.076, lng: 72.8777 },
-      type: "hotspot",
       suspectCount: 5,
     },
     {
       id: "HS-1002",
       name: "Delhi NCR Hub",
       coordinates: { lat: 28.7041, lng: 77.1025 },
-      type: "hotspot",
       suspectCount: 3,
     },
     {
       id: "HS-1003",
       name: "Kolkata East",
       coordinates: { lat: 22.5726, lng: 88.3639 },
-      type: "hotspot",
       suspectCount: 2,
     },
     {
       id: "HS-1004",
       name: "Bangalore Tech Park",
       coordinates: { lat: 12.9716, lng: 77.5946 },
-      type: "hotspot",
       suspectCount: 4,
     },
     {
       id: "HS-1005",
       name: "Chennai Harbor",
       coordinates: { lat: 13.0827, lng: 80.2707 },
-      type: "hotspot",
       suspectCount: 2,
     },
   ]
 
   return (
     <div className="w-full h-full">
-      <GoogleMapsComponent locations={hotspots} mapType="hotspots" height="400px" />
+      <GoogleMapsComponent 
+        locations={hotspots} 
+        mapType="hotspots" 
+        height="400px" 
+      />
     </div>
   )
 }

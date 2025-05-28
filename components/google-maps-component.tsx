@@ -38,8 +38,8 @@ export function GoogleMapsComponent({
   onMarkerClick,
 }: GoogleMapsComponentProps) {
   const mapRef = useRef<HTMLDivElement>(null)
-  const [map, setMap] = useState<google.maps.Map | null>(null)
-  const [markers, setMarkers] = useState<google.maps.Marker[]>([])
+  const [map, setMap] = useState<any>(null)
+  const [markers, setMarkers] = useState<any[]>([])
   const [mapLoaded, setMapLoaded] = useState(false)
 
   // Load Google Maps script
@@ -61,7 +61,9 @@ export function GoogleMapsComponent({
 
     return () => {
       // Clean up script if component unmounts before script loads
-      document.head.removeChild(googleMapsScript)
+      if (document.head.contains(googleMapsScript)) {
+        document.head.removeChild(googleMapsScript)
+      }
     }
   }, [])
 
@@ -81,14 +83,14 @@ export function GoogleMapsComponent({
       }
     }
 
-    const mapOptions: google.maps.MapOptions = {
+    const mapOptions = {
       center,
       zoom: 5,
-      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      mapTypeId: window.google.maps.MapTypeId.ROADMAP,
       mapTypeControl: true,
       mapTypeControlOptions: {
-        style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
-        position: google.maps.ControlPosition.TOP_RIGHT,
+        style: window.google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+        position: window.google.maps.ControlPosition.TOP_RIGHT,
       },
       zoomControl: false,
       streetViewControl: false,
@@ -111,7 +113,7 @@ export function GoogleMapsComponent({
       ],
     }
 
-    const newMap = new google.maps.Map(mapRef.current, mapOptions)
+    const newMap = new window.google.maps.Map(mapRef.current, mapOptions)
     setMap(newMap)
 
     // Clean up
@@ -211,14 +213,14 @@ export function GoogleMapsComponent({
   }
 
   // Change map type
-  const handleMapTypeChange = (mapTypeId: google.maps.MapTypeId) => {
+  const handleMapTypeChange = (mapTypeId: any) => {
     if (map) {
       map.setMapTypeId(mapTypeId)
     }
   }
 
   // Add new location marker
-  const handleAddLocation = (e: google.maps.MapMouseEvent) => {
+  const handleAddLocation = (e: any) => {
     if (!map || !e.latLng) return
 
     const newLocation = {
@@ -299,7 +301,18 @@ export function GoogleMapsComponent({
           </DropdownMenuContent>
         </DropdownMenu>
         {mapType === "surveillance" && (
-          <Button variant="secondary" size="icon" onClick={() => map?.addListener("click", handleAddLocation)}>
+          <Button 
+            variant="secondary" 
+            size="icon" 
+            onClick={() => {
+              // Remove any existing click listeners first
+              if (map && window.google) {
+                window.google.maps.event.clearListeners(map, 'click');
+                // Add the new click listener
+                map.addListener("click", handleAddLocation);
+              }
+            }}
+          >
             <MapPin className="h-4 w-4" />
           </Button>
         )}

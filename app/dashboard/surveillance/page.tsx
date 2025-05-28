@@ -2,8 +2,6 @@
 
 import { useState } from "react"
 import {
-  Filter,
-  Download,
   Plus,
   MapPin,
   Eye,
@@ -21,12 +19,25 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { GoogleMapsComponent } from "@/components/google-maps-component"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 
 export default function SurveillancePage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedArea, setSelectedArea] = useState("all")
-
-  const surveillancePoints = [
+  
+  const [isAddLocationOpen, setIsAddLocationOpen] = useState(false)
+  const [newLocation, setNewLocation] = useState({
+    id: `SP-${1000 + Math.floor(Math.random() * 1000)}`,
+    name: "",
+    type: "hotspot",
+    status: "active",
+    lastUpdated: "Just now",
+    coordinates: { lat: 0, lng: 0 },
+    suspectCount: 1,
+  })
+  const [surveillancePoints, setSurveillancePoints] = useState([
     {
       id: "SP-1001",
       name: "Mumbai Central",
@@ -81,7 +92,43 @@ export default function SurveillancePage() {
       coordinates: { lat: 17.385, lng: 78.4867 },
       suspectCount: 3,
     },
-  ]
+  ])
+
+  const handleAddLocation = () => {
+    if (!newLocation.name || !newLocation.coordinates.lat || !newLocation.coordinates.lng) {
+      return
+    }
+    
+    setSurveillancePoints([
+      ...surveillancePoints,
+      {
+        ...newLocation,
+        id: `SP-${1000 + Math.floor(Math.random() * 1000)}`,
+      }
+    ])
+    
+    setNewLocation({
+      id: `SP-${1000 + Math.floor(Math.random() * 1000)}`,
+      name: "",
+      type: "hotspot",
+      status: "active",
+      lastUpdated: "Just now",
+      coordinates: { lat: 0, lng: 0 },
+      suspectCount: 1,
+    })
+    setIsAddLocationOpen(false)
+  }
+
+  const handleCoordinateChange = (field: string, value: string) => {
+    const numValue = parseFloat(value) || 0
+    setNewLocation({
+      ...newLocation,
+      coordinates: {
+        ...newLocation.coordinates,
+        [field]: numValue
+      }
+    })
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -101,15 +148,7 @@ export default function SurveillancePage() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline">
-              <Filter className="mr-2 h-4 w-4" />
-              Filters
-            </Button>
-            <Button variant="outline">
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
-            <Button>
+            <Button onClick={() => setIsAddLocationOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Add Location
             </Button>
@@ -358,6 +397,99 @@ export default function SurveillancePage() {
           </div>
         </div>
       </div>
+
+      {/* Add Location Dialog */}
+      <Dialog open={isAddLocationOpen} onOpenChange={setIsAddLocationOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Surveillance Location</DialogTitle>
+            <DialogDescription>
+              Enter details about a new suspect location to monitor.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="locationName" className="text-right">
+                Location Name
+              </Label>
+              <Input
+                id="locationName"
+                value={newLocation.name}
+                onChange={(e) => setNewLocation({...newLocation, name: e.target.value})}
+                placeholder="e.g. Downtown Hideout"
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="locationType" className="text-right">
+                Type
+              </Label>
+              <Select 
+                value={newLocation.type} 
+                onValueChange={(value) => setNewLocation({...newLocation, type: value})}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select location type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hotspot">Hotspot</SelectItem>
+                  <SelectItem value="distribution">Distribution</SelectItem>
+                  <SelectItem value="entry">Entry Point</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="latitude" className="text-right">
+                Latitude
+              </Label>
+              <Input
+                id="latitude"
+                type="number"
+                step="0.0001"
+                value={newLocation.coordinates.lat || ""}
+                onChange={(e) => handleCoordinateChange("lat", e.target.value)}
+                placeholder="e.g. 19.0760"
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="longitude" className="text-right">
+                Longitude
+              </Label>
+              <Input
+                id="longitude"
+                type="number"
+                step="0.0001"
+                value={newLocation.coordinates.lng || ""}
+                onChange={(e) => handleCoordinateChange("lng", e.target.value)}
+                placeholder="e.g. 72.8777"
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="suspectCount" className="text-right">
+                Suspect Count
+              </Label>
+              <Input
+                id="suspectCount"
+                type="number"
+                min="1"
+                value={newLocation.suspectCount}
+                onChange={(e) => setNewLocation({...newLocation, suspectCount: parseInt(e.target.value) || 1})}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddLocationOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" onClick={handleAddLocation}>
+              Add Location
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
