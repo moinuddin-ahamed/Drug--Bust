@@ -95,7 +95,7 @@ Drug--Bust/
 This project was created for the Smart India Hackathon (SIH) by:
 
 - **Moin** - _Lead Developer_ - [GitHub Profile](https://github.com/moinuddin-ahamed)
-- **Wujjwal** - _Lead Developer_ - [GitHub Profile](https://github.com/wujjwal)
+- **Wujjwal** - _Lead Developer_ - [GitHub Profile](https://github.com/wujjwalreddy)
 
 ## 🔒 Security Note
 
